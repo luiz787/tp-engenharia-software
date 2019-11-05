@@ -28,7 +28,7 @@ public class Medico extends Funcionario {
     }
 
     public void adicionarConsultaAgenda(final Consulta consulta) {
-        agenda.adicionarConsulta(consulta);
+        agenda.adicionarEvento(consulta);
     }
 
     public boolean disponivel(final LocalDateTime horaInicial, final LocalDateTime horaFinal) {

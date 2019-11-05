@@ -21,7 +21,9 @@ public class ConsultaController {
     private final ConsultaService consultaService;
 
     @PostMapping("/")
-    public ResponseEntity<Consulta> marcarConsulta(@RequestBody @ApiParam("Requisição de marcação de consulta") final RequisicaoConsulta requisicaoConsulta) {
+    public ResponseEntity<Consulta> marcarConsulta(@RequestBody @ApiParam("Requisição de marcação de consulta")
+                                                       final RequisicaoConsulta requisicaoConsulta) {
         return ResponseEntity.ok(consultaService.marcarConsulta(requisicaoConsulta));
     }
+
 }

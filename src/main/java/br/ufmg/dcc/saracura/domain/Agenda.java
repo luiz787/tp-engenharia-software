@@ -11,32 +11,32 @@ import java.util.stream.Collectors;
 
 public class Agenda {
 
-    private List<Consulta> consultas;
+    private List<Evento> eventos;
 
     public Agenda() {
-        this.consultas = new ArrayList<>();
+        this.eventos = new ArrayList<>();
     }
 
-    public void adicionarConsulta(final Consulta consulta) {
-        if (verificarDisponibilidade(consulta.getHorarios())) {
-            consultas.add(consulta);
+    public void adicionarEvento(final Evento evento) {
+        if (verificarDisponibilidade(evento.getHorarios())) {
+            eventos.add(evento);
         } else {
-            throw new BusinessException("A consulta não foi adicionada porque não há disponibilidade no horário.");
+            throw new BusinessException("O evento não foi adicionado porque não há disponibilidade no horário.");
         }
     }
 
-    public void removerConsulta(final Consulta consulta) {
-        consultas.remove(consulta);
+    public void removerEvento(final Evento evento) {
+        eventos.remove(evento);
     }
 
     public boolean verificarDisponibilidade(final Pair<LocalDateTime, LocalDateTime> horarios) {
-        var copiaConsultas = List.copyOf(consultas);
-        var listaHorariosConsultas = copiaConsultas
+        var copiaEventos = List.copyOf(eventos);
+        var listaHorariosEventos = copiaEventos
                 .stream()
-                .map(Consulta::getHorarios)
+                .map(Evento::getHorarios)
                 .collect(Collectors.toList());
-        listaHorariosConsultas.add(horarios);
-        var horariosOrdenados = listaHorariosConsultas
+        listaHorariosEventos.add(horarios);
+        var horariosOrdenados = listaHorariosEventos
                 .stream()
                 .sorted(Comparator.comparing(Pair::getValue0))
                 .collect(Collectors.toList());
