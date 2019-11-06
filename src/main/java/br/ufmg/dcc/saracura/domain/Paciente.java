@@ -38,17 +38,17 @@ public class Paciente extends Pessoa {
 
     public Consulta solicitarConsulta(final RequisicaoConsulta requisicaoConsulta) {
         final var especialidadeRequerida = requisicaoConsulta.getEspecialidade();
-        final Medico medico = obterAlgumMedicoDisponivel(requisicaoConsulta.getHoraInicial(),
+        final var medicosDisponiveisPeriodo = medicoService.obterMedicosDisponiveisPeriodo(requisicaoConsulta.getHoraInicial(),
                 requisicaoConsulta.getHoraFinal(), especialidadeRequerida);
+        final Medico medico = obterAlgumMedicoDisponivel(requisicaoConsulta.getHoraInicial(),
+                requisicaoConsulta.getHoraFinal(), especialidadeRequerida, medicosDisponiveisPeriodo);
         final Consulta consulta = new Consulta(requisicaoConsulta.getHoraInicial(), requisicaoConsulta.getHoraFinal(), medico,
                 this);
         return consultaRepository.persistirConsulta(consulta);
     }
 
     private Medico obterAlgumMedicoDisponivel(final LocalDateTime horaInicial, final LocalDateTime horaFinal,
-                                              final Especialidade especialidadeRequerida) {
-        var medicosDisponiveisPeriodo = medicoService.obterMedicosDisponiveisPeriodo(horaInicial,
-                horaFinal, especialidadeRequerida);
+                                              final Especialidade especialidadeRequerida, List<Medico> medicosDisponiveisPeriodo) {
         return medicosDisponiveisPeriodo
                 .stream()
                 .findFirst()
