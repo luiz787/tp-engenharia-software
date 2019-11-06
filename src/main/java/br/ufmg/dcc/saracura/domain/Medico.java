@@ -1,5 +1,6 @@
 package br.ufmg.dcc.saracura.domain;
 
+import br.ufmg.dcc.saracura.exception.BusinessException;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.javatuples.Pair;
@@ -13,18 +14,26 @@ public class Medico extends Funcionario {
 
     private final String crm;
     private final Especialidade especialidade;
-    private final Agenda agenda;
+    private final Agenda<Consulta> agenda;
 
     public Medico(String cpf, String nome, LocalDate dataNascimento, long salarioInicialCentavos,
                   final String crm, final Especialidade especialidade) {
         super(cpf, nome, dataNascimento, salarioInicialCentavos);
         this.crm = crm;
         this.especialidade = especialidade;
-        this.agenda = new Agenda();
+        this.agenda = new Agenda<>();
     }
 
-    public void Consultar(final Paciente paciente) {
-        // TODO: implementar
+    public void consultar(final Paciente paciente) {
+        // Alguma lógica relativa à consulta estaria aqui.
+
+        // Buscando a consulta da agenda do médico, para adicioná-la ao histórico do paciente.
+        final var consulta = agenda.getEventos()
+                .stream()
+                .filter(c -> c.getPaciente().equals(paciente))
+                .findFirst()
+                .orElseThrow(()-> new BusinessException("Consulta para o paciente CPF " + paciente.getCpf() + " não encontrada."));
+        paciente.adicionarConsultaHistorico(consulta);
     }
 
     public void adicionarConsultaAgenda(final Consulta consulta) {

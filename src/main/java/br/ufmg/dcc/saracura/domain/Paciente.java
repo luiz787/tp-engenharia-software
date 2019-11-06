@@ -25,6 +25,7 @@ public class Paciente extends Pessoa {
     private final EquipamentoRepository equipamentoRepository;
     private final ExameRepository exameRepository;
     private String telefone;
+    private final Set<Consulta> historicoConsultas;
 
     public Paciente(final String cpf, final String nome, final LocalDate dataNascimento, final String telefone,
                     final EquipeMedica equipeMedica, final ConsultaRepository consultaRepository,
@@ -35,6 +36,7 @@ public class Paciente extends Pessoa {
         this.consultaRepository = consultaRepository;
         this.equipamentoRepository = equipamentoRepository;
         this.exameRepository = exameRepository;
+        this.historicoConsultas = new HashSet<>();
     }
 
     public Consulta solicitarConsulta(final RequisicaoConsulta requisicaoConsulta) {
@@ -65,7 +67,7 @@ public class Paciente extends Pessoa {
         final var equipamentosReservados = reservarEquipamentosDisponiveis(requisicaoExame, tiposEquipamentosNecessarios,
                 equipamentosPorTipo, horarioFinal);
 
-        final var exame = new Exame(this, requisicaoExame.getHorarioInicial(), horarioFinal, equipamentosReservados);
+        final var exame = new Exame(this, requisicaoExame.getTipoExame(), requisicaoExame.getHorarioInicial(), horarioFinal, equipamentosReservados);
         return exameRepository.cadastrarExame(exame);
     }
 
@@ -114,5 +116,13 @@ public class Paciente extends Pessoa {
                 .findFirst()
                 .orElseThrow(()-> new BusinessException("Não foi possível marcar o exame pois não há nenhum equipamento do tipo "
                         + tipoEquipamento + " disponível."));
+    }
+
+    protected void adicionarConsultaHistorico(final Consulta consulta) {
+        historicoConsultas.add(consulta);
+    }
+
+    protected Set<Consulta> obterHistoricoConsultas() {
+        return historicoConsultas;
     }
 }

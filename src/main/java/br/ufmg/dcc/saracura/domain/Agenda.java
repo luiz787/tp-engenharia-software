@@ -7,15 +7,15 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Agenda {
+public class Agenda<T extends Evento> {
 
-    private Set<Evento> eventos;
+    private Set<T> eventos;
 
     public Agenda() {
         this.eventos = new HashSet<>();
     }
 
-    public void adicionarEvento(final Evento evento) {
+    public void adicionarEvento(final T evento) {
         if (verificarDisponibilidade(evento.getHorarios())) {
             eventos.add(evento);
         } else {
@@ -23,7 +23,7 @@ public class Agenda {
         }
     }
 
-    public void removerEvento(final Evento evento) {
+    public void removerEvento(final T evento) {
         eventos.remove(evento);
     }
 
@@ -48,5 +48,9 @@ public class Agenda {
             }
         }
         return compativel;
+    }
+
+    public Set<T> getEventos() {
+        return eventos;
     }
 }
