@@ -4,6 +4,7 @@ import br.ufmg.dcc.saracura.dto.RequisicaoConsulta;
 import br.ufmg.dcc.saracura.dto.RequisicaoExame;
 import br.ufmg.dcc.saracura.exception.BusinessException;
 import br.ufmg.dcc.saracura.repository.ConsultaRepository;
+import br.ufmg.dcc.saracura.repository.EquipamentoRepository;
 import br.ufmg.dcc.saracura.repository.ExameRepository;
 import br.ufmg.dcc.saracura.service.EquipamentoService;
 import br.ufmg.dcc.saracura.service.MedicoService;
@@ -19,26 +20,26 @@ import java.util.stream.Collectors;
 @ToString(callSuper = true)
 public class Paciente extends Pessoa {
 
-    private final MedicoService medicoService;
+    private final EquipeMedica equipeMedica;
     private final ConsultaRepository consultaRepository;
-    private final EquipamentoService equipamentoService;
+    private final EquipamentoRepository equipamentoRepository;
     private final ExameRepository exameRepository;
     private String telefone;
 
     public Paciente(final String cpf, final String nome, final LocalDate dataNascimento, final String telefone,
-                    final MedicoService medicoService, final ConsultaRepository consultaRepository,
-                    final EquipamentoService equipamentoService, final ExameRepository exameRepository) {
+                    final EquipeMedica equipeMedica, final ConsultaRepository consultaRepository,
+                    final EquipamentoRepository equipamentoRepository, final ExameRepository exameRepository) {
         super(cpf, nome, dataNascimento);
         this.telefone = Objects.requireNonNull(telefone, "Telefone não pode ser nulo.");
-        this.medicoService = medicoService;
+        this.equipeMedica = equipeMedica;
         this.consultaRepository = consultaRepository;
-        this.equipamentoService = equipamentoService;
+        this.equipamentoRepository = equipamentoRepository;
         this.exameRepository = exameRepository;
     }
 
     public Consulta solicitarConsulta(final RequisicaoConsulta requisicaoConsulta) {
         final var especialidadeRequerida = requisicaoConsulta.getEspecialidade();
-        final var medicosDisponiveisPeriodo = medicoService.obterMedicosDisponiveisPeriodo(requisicaoConsulta.getHoraInicial(),
+        final var medicosDisponiveisPeriodo = equipeMedica.obterMedicosDisponiveisPeriodo(requisicaoConsulta.getHoraInicial(),
                 requisicaoConsulta.getHoraFinal(), especialidadeRequerida);
         final Medico medico = obterAlgumMedicoDisponivel(requisicaoConsulta.getHoraInicial(),
                 requisicaoConsulta.getHoraFinal(), especialidadeRequerida, medicosDisponiveisPeriodo);
@@ -57,7 +58,7 @@ public class Paciente extends Pessoa {
     }
 
     public Exame solicitarExame(final RequisicaoExame requisicaoExame) {
-        final var equipamentos = equipamentoService.obterEquipamentos();
+        final var equipamentos = equipamentoRepository.obterEquipamentos();
         final var tiposEquipamentosNecessarios = requisicaoExame.getTipoExame().getTiposEquipamentosNecessarios();
         final var equipamentosPorTipo = obterEquipamentosTiposRelevantesAgrupadosPorTipo(equipamentos, tiposEquipamentosNecessarios);
         final var horarioFinal = obterHorarioFinalExame(requisicaoExame);

@@ -4,17 +4,14 @@ import br.ufmg.dcc.saracura.dto.RequisicaoConsulta;
 import br.ufmg.dcc.saracura.dto.RequisicaoExame;
 import br.ufmg.dcc.saracura.exception.BusinessException;
 import br.ufmg.dcc.saracura.repository.ConsultaRepository;
+import br.ufmg.dcc.saracura.repository.EquipamentoRepository;
 import br.ufmg.dcc.saracura.repository.ExameRepository;
-import br.ufmg.dcc.saracura.service.EquipamentoService;
-import br.ufmg.dcc.saracura.service.MedicoService;
 import org.javatuples.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.springframework.test.context.TestPropertySource;
 
-import javax.validation.constraints.Null;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,11 +22,11 @@ import static org.mockito.Mockito.when;
 
 public class PacienteTest {
     @Mock
-    private MedicoService medicoService;
+    private EquipeMedica equipeMedica;
     @Mock
     private ConsultaRepository consultaRepository;
     @Mock
-    private EquipamentoService equipamentoService;
+    private EquipamentoRepository equipamentoRepository;
     @Mock
     private ExameRepository exameRepository;
 
@@ -46,7 +43,7 @@ public class PacienteTest {
         final String cpf = "12346611233";
         final LocalDate dataNascimento = LocalDate.of(1950, 1, 1);
         final String telefone = "(11) 97070-7070";
-        return new Paciente(cpf, nome, dataNascimento, telefone, medicoService, consultaRepository, equipamentoService,
+        return new Paciente(cpf, nome, dataNascimento, telefone, equipeMedica, consultaRepository, equipamentoRepository,
                 exameRepository);
     }
 
@@ -60,7 +57,7 @@ public class PacienteTest {
     public void testNewPaciente_TelefoneNulo_NullPointerException() {
         Assertions.assertThrows(NullPointerException.class, () -> {
             new Paciente("78944132555", "SemTelefone", LocalDate.of(1999, 1, 1),
-                    null, medicoService, consultaRepository, equipamentoService,
+                    null, equipeMedica, consultaRepository, equipamentoRepository,
                     exameRepository);
         });
     }
@@ -73,7 +70,7 @@ public class PacienteTest {
         final RequisicaoConsulta requisicaoConsulta = new RequisicaoConsulta(pacienteSolicitante.getCpf(),
                 horaInicial, horaFinal, Especialidade.OFTALMOLOGIA);
 
-        when(medicoService.obterMedicosDisponiveisPeriodo(horaInicial, horaFinal, Especialidade.OFTALMOLOGIA)).thenReturn(Collections.emptyList());
+        when(equipeMedica.obterMedicosDisponiveisPeriodo(horaInicial, horaFinal, Especialidade.OFTALMOLOGIA)).thenReturn(Collections.emptyList());
 
         Assertions.assertThrows(BusinessException.class, () -> {
             pacienteSolicitante.solicitarConsulta(requisicaoConsulta);
@@ -89,7 +86,7 @@ public class PacienteTest {
         final RequisicaoConsulta requisicaoConsulta = new RequisicaoConsulta(pacienteSolicitante.getCpf(),
                 horaInicial, horaFinal, Especialidade.OFTALMOLOGIA);
 
-        when(medicoService.obterMedicosDisponiveisPeriodo(horaInicial, horaFinal, Especialidade.OFTALMOLOGIA))
+        when(equipeMedica.obterMedicosDisponiveisPeriodo(horaInicial, horaFinal, Especialidade.OFTALMOLOGIA))
                 .thenReturn(construirMockMedico());
         when(consultaRepository.persistirConsulta(ArgumentMatchers.any())).then(AdditionalAnswers.returnsFirstArg());
 
@@ -113,7 +110,7 @@ public class PacienteTest {
         final var horaInicial = LocalDateTime.of(2020, 1, 1, 15, 0);
         final var requisicaoExame = new RequisicaoExame(pacienteSolicitante.getCpf(), TipoExame.IMAGEM, horaInicial);
 
-        when(equipamentoService.obterEquipamentos()).thenReturn(Collections.emptyList());
+        when(equipamentoRepository.obterEquipamentos()).thenReturn(Collections.emptyList());
 
         Assertions.assertThrows(BusinessException.class, () -> pacienteSolicitante.solicitarExame(requisicaoExame),
                 "Não foi possível marcar o exame pois não há nenhum equipamento do tipo "
@@ -126,7 +123,7 @@ public class PacienteTest {
         final var horaInicial = LocalDateTime.of(2020, 1, 1, 15, 0);
         final var requisicaoExame = new RequisicaoExame(pacienteSolicitante.getCpf(), TipoExame.IMAGEM, horaInicial);
 
-        when(equipamentoService.obterEquipamentos()).thenReturn(construirMockEquipamento());
+        when(equipamentoRepository.obterEquipamentos()).thenReturn(construirMockEquipamento());
         when(exameRepository.cadastrarExame(ArgumentMatchers.any())).then(AdditionalAnswers.returnsFirstArg());
 
         final var exame = pacienteSolicitante.solicitarExame(requisicaoExame);
