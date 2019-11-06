@@ -31,4 +31,8 @@ public class Exame extends Evento {
     public String getCodigo() {
         return codigo;
     }
+
+    public Paciente getPaciente() {
+        return paciente;
+    }
 }

@@ -2,7 +2,6 @@ package br.ufmg.dcc.saracura.domain;
 
 import java.time.Duration;
 import java.util.EnumSet;
-import java.util.List;
 
 public enum TipoExame {
 
@@ -14,7 +13,7 @@ public enum TipoExame {
     private final Duration duracao;
     private final EnumSet<TipoEquipamento> tiposEquipamentosNecessarios;
 
-    private TipoExame(final Duration duracao, final EnumSet<TipoEquipamento> tiposEquipamentosNecessarios) {
+    TipoExame(final Duration duracao, final EnumSet<TipoEquipamento> tiposEquipamentosNecessarios) {
         this.duracao = duracao;
         this.tiposEquipamentosNecessarios = tiposEquipamentosNecessarios;
     }

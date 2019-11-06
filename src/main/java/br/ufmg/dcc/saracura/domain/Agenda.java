@@ -4,17 +4,15 @@ import br.ufmg.dcc.saracura.exception.BusinessException;
 import org.javatuples.Pair;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Agenda {
 
-    private List<Evento> eventos;
+    private Set<Evento> eventos;
 
     public Agenda() {
-        this.eventos = new ArrayList<>();
+        this.eventos = new HashSet<>();
     }
 
     public void adicionarEvento(final Evento evento) {
@@ -30,11 +28,11 @@ public class Agenda {
     }
 
     public boolean verificarDisponibilidade(final Pair<LocalDateTime, LocalDateTime> horarios) {
-        var copiaEventos = List.copyOf(eventos);
+        var copiaEventos = Set.copyOf(eventos);
         var listaHorariosEventos = copiaEventos
                 .stream()
                 .map(Evento::getHorarios)
-                .collect(Collectors.toList());
+                    .collect(Collectors.toSet());
         listaHorariosEventos.add(horarios);
         var horariosOrdenados = listaHorariosEventos
                 .stream()

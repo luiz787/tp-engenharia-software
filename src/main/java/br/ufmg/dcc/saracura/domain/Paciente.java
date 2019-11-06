@@ -12,10 +12,7 @@ import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = true)
@@ -32,7 +29,7 @@ public class Paciente extends Pessoa {
                     final MedicoService medicoService, final ConsultaRepository consultaRepository,
                     final EquipamentoService equipamentoService, final ExameRepository exameRepository) {
         super(cpf, nome, dataNascimento);
-        this.telefone = telefone;
+        this.telefone = Objects.requireNonNull(telefone, "Telefone não pode ser nulo.");
         this.medicoService = medicoService;
         this.consultaRepository = consultaRepository;
         this.equipamentoService = equipamentoService;
@@ -71,13 +68,14 @@ public class Paciente extends Pessoa {
         return exameRepository.cadastrarExame(exame);
     }
 
-    private ArrayList<Equipamento> reservarEquipamentosDisponiveis(final RequisicaoExame requisicaoExame,
+    private List<Equipamento> reservarEquipamentosDisponiveis(final RequisicaoExame requisicaoExame,
                                                                    final EnumSet<TipoEquipamento> tiposEquipamentosNecessarios,
                                                                    final Map<TipoEquipamento, List<Equipamento>> equipamentosPorTipo,
                                                                    final LocalDateTime horarioFinal) {
         final var equipamentosReservados = new ArrayList<Equipamento>(tiposEquipamentosNecessarios.size());
-        for (var entrada : equipamentosPorTipo.entrySet()) {
-            final var equipamento = obterAlgumEquipamentoDisponivel(requisicaoExame, horarioFinal, entrada);
+        for (var tipoEquipamento : tiposEquipamentosNecessarios) {
+            final var equipamento = obterAlgumEquipamentoDisponivel(requisicaoExame, horarioFinal, tipoEquipamento,
+                    equipamentosPorTipo.get(tipoEquipamento));
             equipamentosReservados.add(equipamento);
         }
         return equipamentosReservados;
@@ -102,12 +100,18 @@ public class Paciente extends Pessoa {
 
     private Equipamento obterAlgumEquipamentoDisponivel(final RequisicaoExame requisicaoExame,
                                                         final LocalDateTime horarioFinal,
-                                                        final Map.Entry<TipoEquipamento, List<Equipamento>> entrada) {
-        return entrada.getValue()
+                                                        final TipoEquipamento tipoEquipamento,
+                                                        final List<Equipamento> equipamentos) {
+        if (equipamentos == null) {
+            throw new BusinessException("Não foi possível marcar o exame pois não há nenhum equipamento do tipo "
+                    + tipoEquipamento + " disponível.");
+        }
+
+        return equipamentos
                 .stream()
                 .filter(e -> e.verificarDisponibilidade(requisicaoExame.getHorarioInicial(), horarioFinal))
                 .findFirst()
                 .orElseThrow(()-> new BusinessException("Não foi possível marcar o exame pois não há nenhum equipamento do tipo "
-                        + entrada.getKey() + " disponível."));
+                        + tipoEquipamento + " disponível."));
     }
 }
